@@ -237,8 +237,8 @@ def main(stdscr):
 
 		key = stdscr.getch()
 
-		if key == curses.KEY_UP:
-			if currRow <= 0 and not gameOver:
+		if key == curses.KEY_UP and not gameOver:
+			if currRow <= 0:
 				currRow = currRow
 			else: 
 				currRow -= 1
@@ -270,8 +270,7 @@ def main(stdscr):
 		if gameOver:
 			GameOver(stdscr)
 			keyLock = True
-
-
+Z
 		stdscr.refresh()
 
 curses.wrapper(main)
