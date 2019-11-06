@@ -6,18 +6,20 @@ def updateMatrix(m):
     m[1][1] = m[1][1] * 2
     return m
 
-def printBoard(A, stdscr):
+def printBoard(A, stdscr, currRow, currCol):
 	maxY, maxX = stdscr.getmaxyx()
 
 	x = maxX//2 - len(A) - len(A)//2
 	y = maxY//2 - len(A)//2
 
-	for row in A:
-		stdscr.addstr(y, x, '\n'.join([''.join(['{:3}'.format(item) for item in row])]))
-		y += 1
-		
+	for i, row in enumerate(A):
+		 for j, col in enumerate(row):
+		 	if currRow == i and currCol == j:
+		 		stdscr.attron(curses.color_pair(1))
 
-    	
+		 	stdscr.addstr(y+i, x+j*3, A[i][j])
+		 	stdscr.attroff(curses.color_pair(1))
+	stdscr.refresh()
 
 def main(stdscr):
 	running = True
@@ -38,19 +40,52 @@ def main(stdscr):
 
 		running = False
 
-	curses.curs_set(2)
+	curses.curs_set(0)
 	curses.noecho()
 	curses.cbreak()
+	curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
+	#stdscr.attron(curses.color_pair(1))
 	stdscr.keypad(True)
 
+	currRow = 0
+	currCol = 0
+	currCell = board[currRow][currCol]
 	while running:
+
 		stdscr.addstr (0, 0, "Columns %i: %s" % (1, sys.argv[1]))
 		stdscr.addstr (1, 0, "Rows %i: %s" % (2, sys.argv[2]))
 		stdscr.addstr (2, 0, "Bombs %i: %s" % (2, sys.argv[2]))
+		printBoard(board, stdscr, currRow, currCol)
 
-		printBoard(board, stdscr)
+		key = stdscr.getch()
+
+		if key == curses.KEY_UP:
+			if currRow <= 0:
+				currRow = currRow
+			else: 
+				currRow -= 1
+			currCell = board[currRow][currCol]
+		elif key == curses.KEY_DOWN:
+			if currRow >= rows-1:
+				currRow = currRow
+			else: 
+				currRow += 1
+			currCell = board[currRow][currCol]
+		elif key == curses.KEY_LEFT:
+			if currCol <= 0:
+				currCol = currCol
+			else: 
+				currCol -= 1
+			currCell = board[currRow][currCol]
+		elif key == curses.KEY_RIGHT:
+			if currCol >= cols-1:
+				currCol = currCol
+			else: 
+				currCol += 1
+			currCell = board[currRow][currCol]
+		elif key == ord('q'):
+			exit()
+
 		stdscr.refresh()
-
-	running = False
 
 curses.wrapper(main)
