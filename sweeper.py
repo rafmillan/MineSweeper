@@ -270,7 +270,7 @@ def main(stdscr):
 		if gameOver:
 			GameOver(stdscr)
 			keyLock = True
-Z
+
 		stdscr.refresh()
 
 curses.wrapper(main)
