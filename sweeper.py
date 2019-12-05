@@ -11,6 +11,8 @@ def printBoard(A, stdscr, currRow, currCol):
 
 	for i, row in enumerate(A):
 		 for j, col in enumerate(row):
+		 	if A[i][j] == '[!]':
+		 		stdscr.attron(curses.color_pair(11))
 		 	if A[i][j] == '[1]':
 		 		stdscr.attron(curses.color_pair(2))
 		 	if A[i][j] == '[2]':
@@ -43,6 +45,7 @@ def printBoard(A, stdscr, currRow, currCol):
 		 	stdscr.attroff(curses.color_pair(8))
 		 	stdscr.attroff(curses.color_pair(9))
 		 	stdscr.attroff(curses.color_pair(10))
+		 	stdscr.attroff(curses.color_pair(11))
 	stdscr.refresh()
 
 def printHiddenBoard(A, stdscr):
@@ -105,6 +108,7 @@ def setCurses(stdscr):
 	curses.init_pair(8, curses.COLOR_BLACK, 0)
 	curses.init_pair(9, curses.COLOR_WHITE, 0)
 	curses.init_pair(10, curses.COLOR_WHITE, curses.COLOR_RED)
+	curses.init_pair(11, curses.COLOR_RED, curses.COLOR_MAGENTA)
 	stdscr.keypad(True)
 
 def isMine(row, col, board):
@@ -178,48 +182,59 @@ def checkBomb(board, myBoard, row, col):
 	#check 8 adjacent cells and count numbombs
 	#North [row-1][col]
 	if not row == 0:
-		if not isMine(row-1, col, board):
+		if not isMine(row-1, col, board) and not isMarked(board, row-1, col):
 			myBoard[row-1][col] = board[row-1][col]
 			
 	#North East [row-1][col+1]
 	if not row == 0 and not col == len(board[row])-1:
-		if not isMine(row-1, col+1, board):
+		if not isMine(row-1, col+1, board) and not isMarked(board, row-1, col+1):
 			myBoard[row-1][col+1] = board[row-1][col+1]
 
 	#East [row][col+1]
 	if not col == len(board[row])-1:
-		if not isMine(row, col+1, board):
+		if not isMine(row, col+1, board) and not isMarked(board, row, col+1):
 			myBoard[row][col+1] = board[row][col+1]
 
 	#South East [row+1][col+1]
 	if not row == len(board)-1 and not col == len(board[col])-1:
-		if not isMine(row+1, col+1, board):
+		if not isMine(row+1, col+1, board) and not isMarked(board, row+1, col+1):
 			myBoard[row+1][col+1] = board[row+1][col+1]
 
 	#South [row+1][col]
 	if not row == len(board)-1:
-		if not isMine(row+1, col, board):
+		if not isMine(row+1, col, board) and not isMarked(board, row+1, col):
 			myBoard[row+1][col] = board[row+1][col]
 
 	#South West [row+1][col-1]
 	if not row == len(board)-1 and not col == 0:
-		if not isMine(row+1, col-1, board):
+		if not isMine(row+1, col-1, board) and not isMarked(board, row+1, col-1):
 			myBoard[row+1][col-1] = board[row+1][col-1]
 
 	#West [row][col-1]
 	if not col == 0:
-		if not isMine(row, col-1, board):
+		if not isMine(row, col-1, board) and not isMarked(board, row, col-1):
 			myBoard[row][col-1] = board[row][col-1]
 
 	#North West [row-1][col-1]
 	if not row == 0 and not col == 0:
-		if not isMine(row-1, col-1, board):
+		if not isMine(row-1, col-1, board) and not isMarked(board, row-1, col-1):
 			myBoard[row-1][col-1] = board[row-1][col-1]
 
-	if isMine(row, col, board):
+	if isMine(row, col, board) and not isMarked(board, row, col):
 		return True;
 	else: 
 		return False
+
+def markBomb(board, myBoard, row, col):
+	if not isMarked(myBoard, row, col):
+		myBoard[row][col] = '[!]'
+	else:
+		myBoard[row][col] = '[ ]'
+
+def isMarked(myBoard, row, col):
+	if myBoard[row][col] == '[!]':
+		return True
+	return False
 
 def GameOver(stdscr):
 	stdscr.erase()
@@ -329,6 +344,10 @@ def main(stdscr):
 		elif key == ord('z') or key == ord('Z') and not keyLock:
 			if checkBomb(board, myBoard, currRow, currCol):
 				gameOver = True
+		elif key == ord('x') or key == ord('X') and not keyLock:
+			markBomb(board, myBoard, currRow, currCol)
+
+
 
 		if gameOver:
 			GameOver(stdscr)
