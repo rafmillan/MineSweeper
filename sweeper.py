@@ -179,49 +179,58 @@ def fillBoard(board):
 
 def checkBomb(board, myBoard, row, col):
 	myBoard[row][col] = board[row][col]
+
+	if isMine(row, col, board) and not isMarked(board, row, col):
+		return True;
+
 	#check 8 adjacent cells and count numbombs
 	#North [row-1][col]
 	if not row == 0:
 		if not isMine(row-1, col, board) and not isMarked(board, row-1, col):
 			myBoard[row-1][col] = board[row-1][col]
+			#checkBomb(board,myBoard,row-1,col)
 			
 	#North East [row-1][col+1]
 	if not row == 0 and not col == len(board[row])-1:
 		if not isMine(row-1, col+1, board) and not isMarked(board, row-1, col+1):
 			myBoard[row-1][col+1] = board[row-1][col+1]
+			#checkBomb(board,myBoard,row-1,col+1)
 
 	#East [row][col+1]
 	if not col == len(board[row])-1:
 		if not isMine(row, col+1, board) and not isMarked(board, row, col+1):
 			myBoard[row][col+1] = board[row][col+1]
+			#checkBomb(board,myBoard,row,col+1)
 
 	#South East [row+1][col+1]
 	if not row == len(board)-1 and not col == len(board[col])-1:
 		if not isMine(row+1, col+1, board) and not isMarked(board, row+1, col+1):
 			myBoard[row+1][col+1] = board[row+1][col+1]
+			#checkBomb(board,myBoard,row+1,col+1)
 
 	#South [row+1][col]
 	if not row == len(board)-1:
 		if not isMine(row+1, col, board) and not isMarked(board, row+1, col):
 			myBoard[row+1][col] = board[row+1][col]
+			#checkBomb(board,myBoard,row+1,col)
 
 	#South West [row+1][col-1]
 	if not row == len(board)-1 and not col == 0:
 		if not isMine(row+1, col-1, board) and not isMarked(board, row+1, col-1):
 			myBoard[row+1][col-1] = board[row+1][col-1]
+			#checkBomb(board,myBoard,row+1,col-1)
 
 	#West [row][col-1]
 	if not col == 0:
 		if not isMine(row, col-1, board) and not isMarked(board, row, col-1):
 			myBoard[row][col-1] = board[row][col-1]
+			#checkBomb(board,myBoard,row,col-1)
 
 	#North West [row-1][col-1]
 	if not row == 0 and not col == 0:
 		if not isMine(row-1, col-1, board) and not isMarked(board, row-1, col-1):
 			myBoard[row-1][col-1] = board[row-1][col-1]
-
-	if isMine(row, col, board) and not isMarked(board, row, col):
-		return True;
+			#checkBomb(board,myBoard,row-1,col=1)
 	else: 
 		return False
 
@@ -235,6 +244,27 @@ def isMarked(myBoard, row, col):
 	if myBoard[row][col] == '[!]':
 		return True
 	return False
+
+def getBombsLeft(myBoard):
+	count = int(sys.argv[3])
+	for row in range(0 ,int(sys.argv[1])):
+		for col in range(0, int(sys.argv[2])):
+			if myBoard[row][col] == '[!]':
+				count-=1
+				if count < 0:
+					count = 0
+	return count
+
+def checkWin(board, myBoard):
+	count = (int(sys.argv[1]) * int(sys.argv[2]))- int(sys.argv[3])
+	for row in range(0 ,int(sys.argv[1])):
+		for col in range(0, int(sys.argv[2])):
+			if myBoard[row][col] == board[row][col] and board[row][col] != '[X]':
+				count -= 1
+	if count == 0:
+		return True
+	else: 
+		return False
 
 def GameOver(stdscr):
 	stdscr.erase()
@@ -265,11 +295,9 @@ def main(stdscr):
 	cols = int(sys.argv[2])
 	numBombs = int(sys.argv[3])
 	#spotsLeft = (rows * cols) - numBombs
-	spotsLeft = 0
 
 	bombProb = numBombs/(rows*cols)
 	stdscr.addstr(4,0,"bombProb: %.2f" % (bombProb))
-	stdscr.addstr(5,0,"Spots Left: %i" % (spotsLeft))
 	stdscr.refresh()
 
 	if len(sys.argv) == 5:
@@ -313,6 +341,9 @@ def main(stdscr):
 		printBoard(myBoard, stdscr, currRow, currCol)
 		printHiddenBoard(board, stdscr)
 
+		spotsLeft = getBombsLeft(board)
+		stdscr.addstr(5,0,"Bombs Left: %i" % (getBombsLeft(myBoard)))
+
 		key = stdscr.getch()
 
 		if key == curses.KEY_UP and not keyLock:
@@ -344,13 +375,16 @@ def main(stdscr):
 		elif key == ord('z') or key == ord('Z') and not keyLock:
 			if checkBomb(board, myBoard, currRow, currCol):
 				gameOver = True
+
 		elif key == ord('x') or key == ord('X') and not keyLock:
 			markBomb(board, myBoard, currRow, currCol)
 
-
-
 		if gameOver:
 			GameOver(stdscr)
+			keyLock = True
+
+		if checkWin(board, myBoard):
+			winGameOver(stdscr)
 			keyLock = True
 
 		stdscr.refresh()
