@@ -5,6 +5,7 @@
 ### Controls
 - [ARROW KEYS] to move along the board.
 - [Z] to dig.
+- [X] mark a bomb.
 - [Q] to quit at any time.
 
 
