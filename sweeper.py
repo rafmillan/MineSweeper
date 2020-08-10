@@ -13,23 +13,23 @@ def printBoard(A, stdscr, currRow, currCol):
 		 for j, col in enumerate(row):
 		 	if A[i][j] == '[!]':
 		 		stdscr.attron(curses.color_pair(11))
-		 	if A[i][j] == '[1]':
+		 	elif A[i][j] == '[1]':
 		 		stdscr.attron(curses.color_pair(2))
-		 	if A[i][j] == '[2]':
+		 	elif A[i][j] == '[2]':
 		 		stdscr.attron(curses.color_pair(3))
-		 	if A[i][j] == '[3]':
+		 	elif A[i][j] == '[3]':
 		 		stdscr.attron(curses.color_pair(4))
-		 	if A[i][j] == '[4]':
+		 	elif A[i][j] == '[4]':
 		 		stdscr.attron(curses.color_pair(5))
-		 	if A[i][j] == '[5]':
+		 	elif A[i][j] == '[5]':
 		 		stdscr.attron(curses.color_pair(6))
-		 	if A[i][j] == '[6]':
+		 	elif A[i][j] == '[6]':
 		 		stdscr.attron(curses.color_pair(7))
-		 	if A[i][j] == '[7]':
+		 	elif A[i][j] == '[7]':
 		 		stdscr.attron(curses.color_pair(8))
-		 	if A[i][j] == '[8]':
+		 	elif A[i][j] == '[8]':
 		 		stdscr.attron(curses.color_pair(9))
-		 	if A[i][j] == '[X]':
+		 	elif A[i][j] == '[X]':
 		 		stdscr.attron(curses.color_pair(10))
 		 	if currRow == i and currCol == j:
 		 		stdscr.attron(curses.color_pair(1))
@@ -177,62 +177,95 @@ def fillBoard(board):
 				board[i][j] = str
 				bombCount = 0
 
+def isInBounds(board, row, col):
+
+	if col < 0 or row < 0:
+		return False
+
+	elif col > len(board[row])-1 or row > len(board)-1:
+		return False
+
+	else:
+		return True
+
+def visited(board, myBoard, row, col):
+	if board[row][col] == myBoard[row][col]:
+		return True
+	else:
+		return False
+
+def checkNeighbors(board, myBoard, row, col):
+
+	neighborRows = [row-1, row-1, row,   row+1, row+1, row+1, row,   row-1]
+	neighborCols = [col,   col+1, col+1, col+1, col,   col-1, col-1, col-1]
+
+	for i in range(8):
+		if isInBounds(board, neighborRows[i], neighborCols[i]):
+			if not isMine(neighborRows[i], neighborCols[i], board) and not isMarked(board, neighborRows[i], neighborCols[i]):
+				myBoard[neighborRows[i]][neighborCols[i]] = board[neighborRows[i]][neighborCols[i]]
+				checkNeighbors(board, myBoard, neighborRows[i], neighborCols[i])
+
+
 def checkBomb(board, myBoard, row, col):
+
 	myBoard[row][col] = board[row][col]
+
+	checkNeighbors(board, myBoard, row, col);
 
 	if isMine(row, col, board) and not isMarked(board, row, col):
 		return True;
 
-	#check 8 adjacent cells and count numbombs
-	#North [row-1][col]
-	if not row == 0:
-		if not isMine(row-1, col, board) and not isMarked(board, row-1, col):
-			myBoard[row-1][col] = board[row-1][col]
-			#checkBomb(board,myBoard,row-1,col)
+
+	# #check 8 adjacent cells and count numbombs
+	# #North [row-1][col]
+	# if not row == 0:
+	# 	if not isMine(row-1, col, board) and not isMarked(board, row-1, col):
+	# 		myBoard[row-1][col] = board[row-1][col]
+	# 		#checkBomb(board,myBoard,row-1,col)
 			
-	#North East [row-1][col+1]
-	if not row == 0 and not col == len(board[row])-1:
-		if not isMine(row-1, col+1, board) and not isMarked(board, row-1, col+1):
-			myBoard[row-1][col+1] = board[row-1][col+1]
-			#checkBomb(board,myBoard,row-1,col+1)
+	# #North East [row-1][col+1]
+	# if not row == 0 and not col == c
+	# 	if not isMine(row-1, col+1, board) and not isMarked(board, row-1, col+1):
+	# 		myBoard[row-1][col+1] = board[row-1][col+1]
+	# 		#checkBomb(board,myBoard,row-1,col+1)
 
-	#East [row][col+1]
-	if not col == len(board[row])-1:
-		if not isMine(row, col+1, board) and not isMarked(board, row, col+1):
-			myBoard[row][col+1] = board[row][col+1]
-			#checkBomb(board,myBoard,row,col+1)
+	# #East [row][col+1]
+	# if not col == len(board[row])-1:
+	# 	if not isMine(row, col+1, board) and not isMarked(board, row, col+1):
+	# 		myBoard[row][col+1] = board[row][col+1]
+	# 		#checkBomb(board,myBoard,row,col+1)
 
-	#South East [row+1][col+1]
-	if not row == len(board)-1 and not col == len(board[col])-1:
-		if not isMine(row+1, col+1, board) and not isMarked(board, row+1, col+1):
-			myBoard[row+1][col+1] = board[row+1][col+1]
-			#checkBomb(board,myBoard,row+1,col+1)
+	# #South East [row+1][col+1]
+	# if not row == len(board)-1 and not col == len(board[col])-1:
+	# 	if not isMine(row+1, col+1, board) and not isMarked(board, row+1, col+1):
+	# 		myBoard[row+1][col+1] = board[row+1][col+1]
+	# 		#checkBomb(board,myBoard,row+1,col+1)
 
-	#South [row+1][col]
-	if not row == len(board)-1:
-		if not isMine(row+1, col, board) and not isMarked(board, row+1, col):
-			myBoard[row+1][col] = board[row+1][col]
-			#checkBomb(board,myBoard,row+1,col)
+	# #South [row+1][col]
+	# if not row == len(board)-1:
+	# 	if not isMine(row+1, col, board) and not isMarked(board, row+1, col):
+	# 		myBoard[row+1][col] = board[row+1][col]
+	# 		#checkBomb(board,myBoard,row+1,col)
 
-	#South West [row+1][col-1]
-	if not row == len(board)-1 and not col == 0:
-		if not isMine(row+1, col-1, board) and not isMarked(board, row+1, col-1):
-			myBoard[row+1][col-1] = board[row+1][col-1]
-			#checkBomb(board,myBoard,row+1,col-1)
+	# #South West [row+1][col-1]
+	# if not row == len(board)-1 and not col == 0:
+	# 	if not isMine(row+1, col-1, board) and not isMarked(board, row+1, col-1):
+	# 		myBoard[row+1][col-1] = board[row+1][col-1]
+	# 		#checkBomb(board,myBoard,row+1,col-1)
 
-	#West [row][col-1]
-	if not col == 0:
-		if not isMine(row, col-1, board) and not isMarked(board, row, col-1):
-			myBoard[row][col-1] = board[row][col-1]
-			#checkBomb(board,myBoard,row,col-1)
+	# #West [row][col-1]
+	# if not col == 0:
+	# 	if not isMine(row, col-1, board) and not isMarked(board, row, col-1):
+	# 		myBoard[row][col-1] = board[row][col-1]
+	# 		#checkBomb(board,myBoard,row,col-1)
 
-	#North West [row-1][col-1]
-	if not row == 0 and not col == 0:
-		if not isMine(row-1, col-1, board) and not isMarked(board, row-1, col-1):
-			myBoard[row-1][col-1] = board[row-1][col-1]
-			#checkBomb(board,myBoard,row-1,col=1)
-	else: 
-		return False
+	# #North West [row-1][col-1]
+	# if not row == 0 and not col == 0:
+	# 	if not isMine(row-1, col-1, board) and not isMarked(board, row-1, col-1):
+	# 		myBoard[row-1][col-1] = board[row-1][col-1]
+	# 		#checkBomb(board,myBoard,row-1,col=1)
+	# else: 
+	# 	return False
 
 def markBomb(board, myBoard, row, col):
 	if not isMarked(myBoard, row, col):
@@ -297,7 +330,6 @@ def main(stdscr):
 	#spotsLeft = (rows * cols) - numBombs
 
 	bombProb = numBombs/(rows*cols)
-	stdscr.addstr(4,0,"bombProb: %.2f" % (bombProb))
 	stdscr.refresh()
 
 	if len(sys.argv) == 5:
@@ -336,15 +368,27 @@ def main(stdscr):
 	gameOver = False
 	win = False
 	keyLock = False
+	cheatMode = False
 	while running:
 		printArgs(stdscr)
 		printBoard(myBoard, stdscr, currRow, currCol)
-		printHiddenBoard(board, stdscr)
 
+		if cheatMode:
+			printHiddenBoard(board, stdscr)
+
+		stdscr.addstr(4,0,"bombProb: %.2f" % (bombProb))
 		spotsLeft = getBombsLeft(board)
 		stdscr.addstr(5,0,"Bombs Left: %i" % (getBombsLeft(myBoard)))
 
+
 		key = stdscr.getch()
+
+		if key == ord('c') or key == ord('C') and not keyLock:
+			if cheatMode:
+				stdscr.clear()
+				cheatMode = False
+			else:
+				cheatMode = True
 
 		if key == curses.KEY_UP and not keyLock:
 			if currRow <= 0:
@@ -382,6 +426,7 @@ def main(stdscr):
 		if gameOver:
 			GameOver(stdscr)
 			keyLock = True
+			cheatMode = True	
 
 		if checkWin(board, myBoard):
 			winGameOver(stdscr)
